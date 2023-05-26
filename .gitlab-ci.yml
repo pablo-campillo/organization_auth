@@ -1,6 +1,19 @@
 stages:
   - test
 
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  key:
+    files:
+      - poetry.lock
+      - .gitlab-ci.yml
+    prefix: ${CI_JOB_NAME}
+  paths:
+    - .venv
+    - .cache/pip
+
 pytest:
   stage: test
   image: python:3.11
@@ -13,7 +26,8 @@ pytest:
     AWS_SECRET_ACCESS_KEY: "test"
   before_script:
     - pip install poetry
-    - poetry install
+    - poetry config virtualenvs.in-project true
+    - poetry install --no-root
     - source `poetry env info --path`/bin/activate
   script:
     - pytest -v --cov=src --cov-report xml --cov-report term-missing tests
