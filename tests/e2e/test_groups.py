@@ -127,7 +127,7 @@ def test_add_role(repo, empty_group):
     assert new_role_name in group.roles
 
 
-def test_add_role_group_does_not_exist(repo, empty_group):
+def test_add_role_group_does_not_exist(repo):
     new_role_name = 'Admin'
     group_id = 'Fake'
 
