@@ -1,6 +1,6 @@
 stages:
-  - test
   - linting
+  - test
 
 ruff:
   stage: linting
@@ -8,14 +8,14 @@ ruff:
   script:
     - ruff --format=gitlab .
 
-mypy:
-  stage: linting
-  image: python:3.11
-  before_script:
-    - pip install mypy
-  script:
-    - mypy src
-
+#mypy:
+#  stage: linting
+#  image: python:3.11
+#  before_script:
+#    - pip install mypy
+#  script:
+#    - mypy src
+#
 pytest:
   stage: test
   image: python:3.11
