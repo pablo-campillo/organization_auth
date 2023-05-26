@@ -30,11 +30,11 @@ class TeamsAbstractRepository(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_group(self, group_id: UUID4): # pragma: no cover
+    def get_group(self, group_id: UUID4) -> Group: # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def list_groups(self, team_id: UUID4): # pragma: no cover
+    def list_groups(self, team_id: UUID4) -> List[Group]: # pragma: no cover
         pass
 
     @abc.abstractmethod

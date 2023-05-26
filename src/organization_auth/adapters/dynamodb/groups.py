@@ -1,5 +1,5 @@
 import uuid
-from pynamodb.attributes import UnicodeAttribute, BooleanAttribute
+from pynamodb.attributes import UnicodeAttribute, BooleanAttribute, ListAttribute
 
 from organization_auth.adapters.dynamodb.base import DDBOrganizationModel
 from organization_auth.domain.groups import Group, GroupUser
@@ -13,6 +13,7 @@ class DDBGroup(DDBOrganizationModel, discriminator=GROUP_CLASS):
     role = UnicodeAttribute()
     deleted = BooleanAttribute()
     enabled = BooleanAttribute()
+    roles = ListAttribute()
 
     @staticmethod
     def from_domain(group: Group):
@@ -22,6 +23,7 @@ class DDBGroup(DDBOrganizationModel, discriminator=GROUP_CLASS):
             role=group.role,
             deleted=group.deleted,
             enabled=group.enabled,
+            roles=list(group.roles),
             created_at=group.created_at,
             updated_at=group.updated_at,
             )
@@ -34,6 +36,7 @@ class DDBGroup(DDBOrganizationModel, discriminator=GROUP_CLASS):
             role=self.role,
             deleted=self.deleted,
             enabled=self.enabled,
+            roles=set(self.roles),
             created_at=self.created_at,
             updated_at=self.updated_at,
             )

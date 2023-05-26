@@ -1,34 +1,34 @@
-class TeamAlreadyExists(Exception):
+class TeamAlreadyExistsException(Exception):
     pass
 
 
-class TeamDoesNotExist(Exception):
+class TeamDoesNotExistException(Exception):
     pass
 
 
-class GroupAlreadyExists(Exception):
+class GroupAlreadyExistsException(Exception):
     pass
 
 
-class GroupDoesNotExist(Exception):
+class GroupDoesNotExistException(Exception):
     pass
 
 
-class RoleDoesNotExist(Exception):
+class RoleDoesNotExistException(Exception):
     pass
 
 
-class UserAlreadyExists(Exception):
+class UserAlreadyExistsException(Exception):
     pass
 
 
-class UserDoesNotExist(Exception):
+class UserDoesNotExistException(Exception):
     pass
 
 
-class UserAlreadyInGroup(Exception):
+class UserAlreadyInGroupException(Exception):
     pass
 
 
-class GroupUserDoesNotExist(Exception):
+class GroupUserDoesNotExistException(Exception):
     pass

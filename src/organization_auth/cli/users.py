@@ -4,7 +4,7 @@ import typer
 from organization_auth.adapters.repositories.teams import TeamsDynamoDBRepository
 from organization_auth.cli.view import show_group, show_groups
 from organization_auth.service_layer import users as service
-from organization_auth.service_layer.exceptions import RoleDoesNotExist, UserAlreadyExists
+from organization_auth.service_layer.exceptions import RoleDoesNotExistException, UserAlreadyExistsException
 
 
 app = typer.Typer()
@@ -17,7 +17,7 @@ def new(team_id: UUID, user_id: UUID, name: str, role: str):
     try:
         user = service.create_user(repo, team_id=team_id, user_id=user_id, name=name, role=role)
         show_group(user)
-    except UserAlreadyExists:
+    except UserAlreadyExistsException:
         pass
 
 
@@ -27,7 +27,7 @@ def get(user_id: UUID):
     try:
         user = service.get_user(repo, user_id=user_id)
         show_group(user)
-    except UserAlreadyExists:
+    except UserAlreadyExistsException:
         pass
 
 
@@ -38,7 +38,7 @@ def rm(user_id: UUID):
         try:
             user = service.delete_user(repo, user_id=user_id)
             show_group(user)
-        except UserAlreadyExists:
+        except UserAlreadyExistsException:
             pass
 
 
@@ -48,7 +48,7 @@ def disable(user_id: UUID):
     try:
         user = service.disable_user(repo, user_id=user_id)
         show_group(user)
-    except UserAlreadyExists:
+    except UserAlreadyExistsException:
         pass
 
 
@@ -58,7 +58,7 @@ def enable(user_id: UUID):
     try:
         user = service.enable_user(repo, user_id=user_id)
         show_group(user)
-    except UserAlreadyExists:
+    except UserAlreadyExistsException:
         pass
 
 
@@ -68,7 +68,7 @@ def rename(user_id: UUID, new_name: str):
     try:
         user = service.change_user_name(repo, user_id=user_id, new_name=new_name)
         show_group(user)
-    except UserAlreadyExists:
+    except UserAlreadyExistsException:
         pass
 
 
@@ -78,9 +78,9 @@ def rerole(user_id: UUID, new_role: str):
     try:
         user = service.change_user_role(repo, user_id=user_id, new_name=new_role)
         show_group(user)
-    except UserAlreadyExists:
+    except UserAlreadyExistsException:
         pass
-    except RoleDoesNotExist:
+    except RoleDoesNotExistException:
         pass
 
 
