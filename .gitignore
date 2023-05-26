@@ -1,2 +1,5 @@
 __pycache__
+.idea
 .coverage
+coverage.xml
+report.xml
