@@ -5,7 +5,7 @@ from organization_auth.adapters.repositories.teams import TeamsAbstractRepositor
 from organization_auth.domain.groups import Group, GroupUser
 from organization_auth.domain.roles import DCERoleEnum
 from organization_auth.service_layer.exceptions import (
-    GroupUserDoesNotExist, RoleDoesNotExist, UserAlreadyInGroup
+    GroupUserDoesNotExistException, RoleDoesNotExistException, UserAlreadyInGroupException
 )
 from organization_auth.service_layer.groups import get_group
 from organization_auth.service_layer.users import get_user
@@ -19,13 +19,17 @@ def get_user_in_group(repo: TeamsAbstractRepository, team_id: UUID4, group_id: U
     return repo.get_user_in_group(team_id, group_id, user_id)
 
 
-def add_user_to_group(repo: TeamsAbstractRepository, team_id: UUID4, group_id: UUID4, user_id: UUID4,
+def add_user_to_group(repo: TeamsAbstractRepository, group_id: UUID4, user_id: UUID4,
                       role: str) -> GroupUser:
     user = get_user(repo, user_id)
     group = get_group(repo, group_id)
+    team_id = group.team_id
 
     if is_user_in_group(repo, team_id, group_id, user_id):
-        raise UserAlreadyInGroup()
+        raise UserAlreadyInGroupException()
+
+    if not group.is_valid_role(role_name=role):
+        raise RoleDoesNotExistException()
 
     group_user = GroupUser(id=user.id, team_id=team_id, group_id=group.id, role=role)
     return repo.save_group_user(group_user)
@@ -34,13 +38,13 @@ def add_user_to_group(repo: TeamsAbstractRepository, team_id: UUID4, group_id: U
 def change_user_group_role(repo: TeamsAbstractRepository, team_id: UUID4, group_id: UUID4, user_id: UUID4,
                            new_role: str) -> GroupUser:
     if not DCERoleEnum.is_valid(new_role):
-        raise RoleDoesNotExist()
+        raise RoleDoesNotExistException()
 
     if (group_user := get_user_in_group(repo, team_id, group_id, user_id)) is not None:
         group_user.role = new_role
         return repo.save_group_user(group_user)
     else:
-        raise GroupUserDoesNotExist()
+        raise GroupUserDoesNotExistException()
 
 
 # def delete_user_from_group(repo: TeamsAbstractRepository,

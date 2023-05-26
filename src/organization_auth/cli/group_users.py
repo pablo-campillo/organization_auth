@@ -2,10 +2,11 @@ from uuid import UUID
 import typer
 
 from organization_auth.adapters.repositories.teams import TeamsDynamoDBRepository
-from organization_auth.cli.view import show_group, show_groups
-from organization_auth.service_layer import teams as service
+from organization_auth.cli.view import show_group, show_group_user, show_groups
+from organization_auth.service_layer import group_user as service
 from organization_auth.service_layer.exceptions import (
-    GroupDoesNotExist, GroupUserDoesNotExist, RoleDoesNotExist, UserAlreadyInGroup, UserDoesNotExist
+    GroupDoesNotExistException, GroupUserDoesNotExistException, RoleDoesNotExistException,
+    UserAlreadyInGroupException, UserDoesNotExistException
 )
 
 
@@ -21,16 +22,16 @@ def get(team_id: UUID, group_id: UUID, user_id: UUID):
 
 
 @app.command()
-def add(team_id: UUID, group_id: UUID, user_id: UUID, role: str):
+def add(group_id: UUID, user_id: UUID, role: str):
     """Adds a User to a Group of a Team with a given role"""
     try:
-        group_user = service.add_user_to_group(team_id=team_id, group_id=group_id, user_id=user_id)
-        show_group(group_user)
-    except UserDoesNotExist:
+        group_user = service.add_user_to_group(repo, group_id=group_id, user_id=user_id, role=role)
+        show_group_user(group_user)
+    except UserDoesNotExistException:
         pass
-    except GroupDoesNotExist:
+    except GroupDoesNotExistException:
         pass
-    except UserAlreadyInGroup:
+    except UserAlreadyInGroupException:
         pass
 
 
@@ -43,9 +44,9 @@ def rerole(team_id: UUID, group_id: UUID, user_id: UUID, new_role: str):
                                                     user_id=user_id,
                                                     new_role=new_role)
         show_group(group_user)
-    except GroupUserDoesNotExist:
+    except GroupUserDoesNotExistException:
         pass
-    except RoleDoesNotExist:
+    except RoleDoesNotExistException:
         pass
 
 

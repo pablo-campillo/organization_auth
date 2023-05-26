@@ -4,7 +4,6 @@ import pytest
 from organization_auth.adapters.dynamodb.base import DDBOrganizationModel
 from organization_auth.adapters.repositories.teams import TeamsDynamoDBRepository
 from organization_auth.domain.groups import GroupUser
-from organization_auth.domain.roles import DCERoleEnum
 from organization_auth.service_layer.group_user import add_user_to_group
 from organization_auth.service_layer.groups import create_group
 from organization_auth.service_layer.teams import create_team
@@ -77,7 +76,7 @@ def team_with_5_users(repo, empty_team):
 
 
 @pytest.fixture()
-def team_with_a_user_and_empty_team(repo, empty_team):
+def team_with_a_user_and_empty_group(repo, empty_team):
     empty_team.users = [
         create_user(repo, team_id=empty_team.id, user_id=uuid4(), name="MyUser", role="User")
     ]
@@ -88,43 +87,40 @@ def team_with_a_user_and_empty_team(repo, empty_team):
 
 
 @pytest.fixture()
-def user_in_group(repo, team_with_a_user_and_empty_team) -> GroupUser:
-    team = team_with_a_user_and_empty_team
+def user_in_group(repo, team_with_a_user_and_empty_group) -> GroupUser:
+    team = team_with_a_user_and_empty_group
     group_id = team.groups[0].id
     user_id = team.users[0].id
-    role = DCERoleEnum.User.name
-    return add_user_to_group(repo, team_id=team.id, group_id=group_id, user_id=user_id, role=role)
+    role = "User"
+    return add_user_to_group(repo, group_id=group_id, user_id=user_id, role=role)
 
 
 @pytest.fixture()
 def team_with_user_in_3_groups(repo, empty_team):
     user_id1 = uuid4()
     user_id2 = uuid4()
-    role = DCERoleEnum.User.name
+    role = "User"
+    roles = ["User", "Power_User", "Team_Owner"]
     empty_team.users = [
         create_user(repo, team_id=empty_team.id, user_id=user_id1, name="MyUser", role=role),
         create_user(repo, team_id=empty_team.id, user_id=user_id2, name="MyUser", role=role)
     ]
     empty_team.groups = [
-        create_group(repo, team_id=empty_team.id, group_id=uuid4(), name="MyGroup0", role=role),
-        create_group(repo, team_id=empty_team.id, group_id=uuid4(), name="MyGroup1", role=role),
-        create_group(repo, team_id=empty_team.id, group_id=uuid4(), name="MyGroup2", role=role),
-        create_group(repo, team_id=empty_team.id, group_id=uuid4(), name="MyGroup3", role=role),
-        create_group(repo, team_id=empty_team.id, group_id=uuid4(), name="MyGroup4", role=role),
+        create_group(repo, team_id=empty_team.id, group_id=uuid4(), name="MyGroup0", role=role, roles=roles),
+        create_group(repo, team_id=empty_team.id, group_id=uuid4(), name="MyGroup1", role=role, roles=roles),
+        create_group(repo, team_id=empty_team.id, group_id=uuid4(), name="MyGroup2", role=role, roles=roles),
+        create_group(repo, team_id=empty_team.id, group_id=uuid4(), name="MyGroup3", role=role, roles=roles),
+        create_group(repo, team_id=empty_team.id, group_id=uuid4(), name="MyGroup4", role=role, roles=roles),
     ]
     empty_team.groups[0].users = [
-        add_user_to_group(repo, team_id=empty_team.id,
-                          group_id=empty_team.groups[0].id, user_id=user_id1, role=DCERoleEnum.User.name),
-        add_user_to_group(repo, team_id=empty_team.id,
-                          group_id=empty_team.groups[0].id, user_id=user_id2, role=DCERoleEnum.User.name),
+        add_user_to_group(repo, group_id=empty_team.groups[0].id, user_id=user_id1, role="User"),
+        add_user_to_group(repo, group_id=empty_team.groups[0].id, user_id=user_id2, role="User"),
     ]
     empty_team.groups[2].users = [
-        add_user_to_group(repo, team_id=empty_team.id,
-                          group_id=empty_team.groups[2].id, user_id=user_id1, role=DCERoleEnum.Power_User.name),
+        add_user_to_group(repo, group_id=empty_team.groups[2].id, user_id=user_id1, role="Power_User"),
     ]
 
     empty_team.groups[4].users = [
-        add_user_to_group(repo, team_id=empty_team.id,
-                          group_id=empty_team.groups[4].id, user_id=user_id1, role=DCERoleEnum.Team_Owner.name)
+        add_user_to_group(repo, group_id=empty_team.groups[4].id, user_id=user_id1, role="Team_Owner")
     ]
     return empty_team

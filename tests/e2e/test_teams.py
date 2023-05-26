@@ -3,7 +3,7 @@ from uuid import UUID, uuid4
 from organization_auth.adapters.repositories.teams import TeamsDynamoDBRepository
 
 
-from organization_auth.service_layer.exceptions import TeamAlreadyExists, TeamDoesNotExist
+from organization_auth.service_layer.exceptions import TeamAlreadyExistsException, TeamDoesNotExistException
 from organization_auth.service_layer.teams import (
     change_team_name, create_team, delete_team, disable_team, enable_team, get_team, list_teams
 )
@@ -35,7 +35,7 @@ def test_create_team_auto_id():
 
 
 def test_create_team_already_exists_exception(repo, empty_team):
-    with pytest.raises(TeamAlreadyExists):
+    with pytest.raises(TeamAlreadyExistsException):
         create_team(repo, team_id=empty_team.id, name="MyTeam")
 
 
@@ -48,7 +48,7 @@ def test_delete_team(repo, empty_team):
 def test_delete_team_does_not_exists(repo):
     repo = TeamsDynamoDBRepository()
 
-    with pytest.raises(TeamDoesNotExist):
+    with pytest.raises(TeamDoesNotExistException):
         delete_team(repo, team_id="Fake")
 
 
@@ -59,7 +59,7 @@ def test_disable_team(repo, empty_team):
 
 
 def test_diable_team_does_not_exists(repo):
-    with pytest.raises(TeamDoesNotExist):
+    with pytest.raises(TeamDoesNotExistException):
         disable_team(repo, team_id="Fake")
 
 
@@ -70,7 +70,7 @@ def test_enable_team(repo, empty_team):
 
 
 def test_enable_team_does_not_exists(repo):
-    with pytest.raises(TeamDoesNotExist):
+    with pytest.raises(TeamDoesNotExistException):
         enable_team(repo, team_id="Fake")
 
 
@@ -85,7 +85,7 @@ def test_change_team_name(repo, empty_team):
 
 def test_change_team_name_does_not_exists(repo):
     new_name = "MyNewTeamName"
-    with pytest.raises(TeamDoesNotExist):
+    with pytest.raises(TeamDoesNotExistException):
         change_team_name(repo, team_id="Fake", new_name=new_name)
 
 
@@ -97,7 +97,7 @@ def test_get_team(repo, empty_team):
 
 
 def test_get_team_does_not_exists(repo):
-    with pytest.raises(TeamDoesNotExist):
+    with pytest.raises(TeamDoesNotExistException):
         get_team(repo, team_id="Fake")
 
 
