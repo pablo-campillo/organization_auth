@@ -24,12 +24,13 @@ pytest:
     AWS_URL: "http://localstack:4566"
     AWS_ACCESS_KEY_ID: "test"
     AWS_SECRET_ACCESS_KEY: "test"
+    PYTHONPATH: "src"
   before_script:
     - pip install poetry
     - poetry config virtualenvs.in-project true
     - poetry install --no-root
   script:
-    - PYTHONPATH=src poetry run pytest -v --junitxml=report.xml --cov=src --cov-report xml --cov-report term-missing tests
+    - poetry run pytest -v --junitxml=report.xml --cov=src --cov-report xml --cov-report term-missing tests
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
