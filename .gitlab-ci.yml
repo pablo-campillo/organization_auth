@@ -28,9 +28,8 @@ pytest:
     - pip install poetry
     - poetry config virtualenvs.in-project true
     - poetry install --no-root
-    - source `poetry env info --path`/bin/activate
   script:
-    - PYTHONPATH=src pytest -v --cov=src --cov-report xml --cov-report term-missing tests
+    - PYTHONPATH=src poetry run pytest -v --cov=src --cov-report xml --cov-report term-missing tests
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
