@@ -2,7 +2,7 @@ from uuid import UUID
 import typer
 
 from organization_auth.adapters.repositories.teams import TeamsDynamoDBRepository
-from organization_auth.cli.view import show_group, show_group_user, show_groups
+from organization_auth.cli.view import show_group, show_group_user, show_group_users, show_groups
 from organization_auth.service_layer import group_user as service
 from organization_auth.service_layer.exceptions import (
     GroupDoesNotExistException, GroupUserDoesNotExistException, RoleDoesNotExistException,
@@ -39,11 +39,12 @@ def add(group_id: UUID, user_id: UUID, role: str):
 def rerole(team_id: UUID, group_id: UUID, user_id: UUID, new_role: str):
     """Changes the role of the User in the Group"""
     try:
-        group_user = service.change_user_group_role(team_id=team_id,
+        group_user = service.change_user_group_role(repo=repo,
+                                                    team_id=team_id,
                                                     group_id=group_id,
                                                     user_id=user_id,
                                                     new_role=new_role)
-        show_group(group_user)
+        show_group_user(group_user)
     except GroupUserDoesNotExistException:
         pass
     except RoleDoesNotExistException:
@@ -51,7 +52,7 @@ def rerole(team_id: UUID, group_id: UUID, user_id: UUID, new_role: str):
 
 
 @app.command()
-def ls(team_id: UUID, user_id: UUID):
+def ls(team_id: UUID, group_id: UUID):
     """List all Groups where a User belongs to"""
-    user_groups = service.list_groups_of_user(team_id=team_id, user_id=user_id)
-    show_groups(user_groups)
+    user_groups = service.list_group_users(repo=repo, team_id=team_id, group_id=group_id)
+    show_group_users(user_groups)

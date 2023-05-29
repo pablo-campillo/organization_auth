@@ -3,7 +3,6 @@ from pydantic import UUID4
 
 from organization_auth.adapters.repositories.teams import TeamsAbstractRepository
 from organization_auth.domain.groups import Group, GroupUser
-from organization_auth.domain.roles import DCERoleEnum
 from organization_auth.service_layer.exceptions import (
     GroupUserDoesNotExistException, RoleDoesNotExistException, UserAlreadyInGroupException
 )
@@ -37,12 +36,17 @@ def add_user_to_group(repo: TeamsAbstractRepository, group_id: UUID4, user_id: U
 
 def change_user_group_role(repo: TeamsAbstractRepository, team_id: UUID4, group_id: UUID4, user_id: UUID4,
                            new_role: str) -> GroupUser:
-    if not DCERoleEnum.is_valid(new_role):
+    group = get_group(repo, group_id)
+
+    if not group.is_valid_role(role_name=new_role):
         raise RoleDoesNotExistException()
 
     if (group_user := get_user_in_group(repo, team_id, group_id, user_id)) is not None:
+        print(group_user)
         group_user.role = new_role
-        return repo.save_group_user(group_user)
+        result = repo.save_group_user(group_user)
+        print(result)
+        return result
     else:
         raise GroupUserDoesNotExistException()
 
@@ -56,9 +60,9 @@ def change_user_group_role(repo: TeamsAbstractRepository, team_id: UUID4, group_
 #         raise GroupUserDoesNotExist()
 
 
-def list_group_users(repo: TeamsAbstractRepository, team_id: UUID4, group_id: UUID4) -> List[Group]:
+def list_group_users(repo: TeamsAbstractRepository, team_id: UUID4, group_id: UUID4) -> List[GroupUser]:
     return repo.list_group_users(team_id=team_id, group_id=group_id)
 
 
-def list_groups_of_user(repo: TeamsAbstractRepository, team_id: UUID4, user_id: UUID4) -> List[Group]:
+def list_groups_of_user(repo: TeamsAbstractRepository, team_id: UUID4, user_id: UUID4) -> List[GroupUser]:
     return repo.list_groups_of_user(team_id=team_id, user_id=user_id)

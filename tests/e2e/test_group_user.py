@@ -78,11 +78,12 @@ def test_change_user_group_role_does_not_exists(repo, user_in_group):
 
 def test_change_user_group_role_where_user_does_not_exist(repo, user_in_group):
     new_role = "Power_User"
-    group_id = "Fake"
+    user_id = "Fake"
+    group_id = user_in_group.group_id
 
     with pytest.raises(GroupUserDoesNotExistException):
         change_user_group_role(repo, team_id=user_in_group.team_id,
-                               group_id=group_id, user_id=user_in_group.id, new_role=new_role)
+                               group_id=group_id, user_id=user_id, new_role=new_role)
 
 
 def test_list_group_users(repo, team_with_user_in_3_groups):

@@ -1,14 +1,19 @@
+from datetime import timedelta
+from typing import Optional
 from uuid import UUID
+from organization_auth.adapters.tokens import JoseJWTTokenProcessor
 import typer
 
 from organization_auth.adapters.repositories.teams import TeamsDynamoDBRepository
-from organization_auth.cli.view import show_group, show_groups
+from organization_auth.cli.view import show_access_token, show_group, show_groups
 from organization_auth.service_layer import users as service
+from organization_auth.service_layer import tokens as token_service
 from organization_auth.service_layer.exceptions import RoleDoesNotExistException, UserAlreadyExistsException
 
 
 app = typer.Typer()
 repo = TeamsDynamoDBRepository()
+token_processor = JoseJWTTokenProcessor()
 
 
 @app.command()
@@ -89,3 +94,19 @@ def ls(team_id: UUID):
     """Lists all Users in a Team"""
     users = service.list_users(team_id)
     show_groups(users)
+
+
+@app.command()
+def access_token(user_id: UUID, exp: Optional[int] = None):
+    """Creates an access token for a User."""
+
+    expires_delta = timedelta(minutes=exp) if exp else None
+
+    access_token = token_service.create_access_token(
+        repo=repo,
+        token_processor=token_processor,
+        user_id=user_id, expires_delta=expires_delta)
+
+    user_token = token_service.decode_access_token(token_processor=token_processor, token=access_token)
+
+    show_access_token(access_token, user_token)

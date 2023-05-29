@@ -1,9 +1,10 @@
 from typing import List
+from organization_auth.domain.tokens import UserToken
 from rich.table import Table
 from rich.tree import Tree
 
 from organization_auth.cli.console import console
-from organization_auth.domain.groups import Group
+from organization_auth.domain.groups import Group, GroupUser
 from organization_auth.domain.teams import Team
 from organization_auth.domain.users import User
 
@@ -52,14 +53,40 @@ def show_group(group: Group):
     console.print(table)
 
 
-def show_group_user(group: Group):
+def show_group_user(group_user: GroupUser):
     table = Table("Field", "Value")
 
-    table.add_row("ID", str(group.id))
-    table.add_row("TeamID", str(group.team_id))
-    table.add_row("Role", str(group.role))
-    table.add_row("CreatedAt", group.created_at.isoformat())
-    table.add_row("UpdatedAt", group.updated_at.isoformat())
+    table.add_row("ID", str(group_user.id))
+    table.add_row("TeamID", str(group_user.team_id))
+    table.add_row("Role", str(group_user.role))
+    table.add_row("CreatedAt", group_user.created_at.isoformat())
+    table.add_row("UpdatedAt", group_user.updated_at.isoformat())
+
+    console.print(table)
+    table = Table("Field", "Value")
+
+    table.add_row("ID", str(group_user.id))
+    table.add_row("TeamID", str(group_user.team_id))
+    table.add_row("GroupID", str(group_user.group_id))
+    table.add_row("Role", str(group_user.role))
+    table.add_row("CreatedAt", group_user.created_at.isoformat())
+    table.add_row("UpdatedAt", group_user.updated_at.isoformat())
+
+    console.print(table)
+
+
+def show_group_users(group_users: List[GroupUser]):
+    table = Table("ID", "TeamID", "GroupID", "Role", "CreatedAt", "DeletedAt")    
+
+    for group_user in group_users:
+        table.add_row(
+            str(group_user.id),
+            str(group_user.team_id),
+            str(group_user.group_id),
+            str(group_user.role),
+            group_user.created_at.isoformat(),
+            group_user.updated_at.isoformat(),
+        )
 
     console.print(table)
 
@@ -79,6 +106,11 @@ def show_groups(groups: List[Group]):
         )
 
     console.print(table)
+
+
+def show_access_token(access_token: str, user_token: UserToken):
+    console.print({"access_token": access_token})
+    console.print(user_token.dict())
 
 
 def show_tree_teams(teams: List[Team]):

@@ -1,4 +1,5 @@
 from uuid import uuid4
+from organization_auth.adapters.tokens import JoseJWTTokenProcessor
 import pytest
 
 from organization_auth.adapters.dynamodb.base import DDBOrganizationModel
@@ -20,6 +21,11 @@ def reset_dynamodb_table():
 @pytest.fixture()
 def repo():
     return TeamsDynamoDBRepository()
+
+
+@pytest.fixture()
+def token_processor():
+    return JoseJWTTokenProcessor()
 
 
 @pytest.fixture()
@@ -81,7 +87,8 @@ def team_with_a_user_and_empty_group(repo, empty_team):
         create_user(repo, team_id=empty_team.id, user_id=uuid4(), name="MyUser", role="User")
     ]
     empty_team.groups = [
-        create_group(repo, team_id=empty_team.id, group_id=uuid4(), name="MyGroup", role="User")
+        create_group(repo, team_id=empty_team.id, group_id=uuid4(), name="MyGroup", role="User",
+                     roles=["User", "Power_User"])
     ]
     return empty_team
 
