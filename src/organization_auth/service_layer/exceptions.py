@@ -32,3 +32,7 @@ class UserAlreadyInGroupException(Exception):
 
 class GroupUserDoesNotExistException(Exception):
     pass
+
+
+class TokenExpiredException(Exception):
+    pass
