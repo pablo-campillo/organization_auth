@@ -11,7 +11,7 @@ from organization_auth.service_layer import tokens as token_service
 from organization_auth.service_layer.exceptions import RoleDoesNotExistException, UserAlreadyExistsException
 
 
-app = typer.Typer()
+app = typer.Typer(no_args_is_help=True)
 repo = TeamsDynamoDBRepository()
 token_processor = JoseJWTTokenProcessor()
 

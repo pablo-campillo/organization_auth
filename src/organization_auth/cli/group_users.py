@@ -10,7 +10,7 @@ from organization_auth.service_layer.exceptions import (
 )
 
 
-app = typer.Typer()
+app = typer.Typer(no_args_is_help=True)
 repo = TeamsDynamoDBRepository()
 
 

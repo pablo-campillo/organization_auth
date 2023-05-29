@@ -9,7 +9,7 @@ from organization_auth.cli.view import show_team, show_teams, show_tree_team, sh
 from organization_auth.service_layer import teams as teams_service
 from organization_auth.service_layer import trees as trees_service
 
-app = typer.Typer()
+app = typer.Typer(no_args_is_help=True)
 repo = TeamsDynamoDBRepository()
 
 
