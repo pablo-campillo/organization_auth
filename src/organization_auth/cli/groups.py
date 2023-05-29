@@ -6,7 +6,9 @@ from organization_auth.cli.console import error_console
 from organization_auth.adapters.repositories.teams import TeamsDynamoDBRepository
 from organization_auth.cli.view import show_group, show_groups
 from organization_auth.service_layer import groups as service
-from organization_auth.service_layer.exceptions import GroupAlreadyExistsException, GroupDoesNotExistException, RoleDoesNotExistException
+from organization_auth.service_layer.exceptions import (
+    GroupAlreadyExistsException, GroupDoesNotExistException, RoleDoesNotExistException
+)
 
 
 app = typer.Typer(no_args_is_help=True)

@@ -2,7 +2,6 @@ import uuid
 from pynamodb.attributes import UnicodeAttribute, BooleanAttribute
 
 from organization_auth.adapters.dynamodb.base import DDBOrganizationModel
-from organization_auth.domain.roles import DCERoleEnum
 from organization_auth.domain.users import User
 
 

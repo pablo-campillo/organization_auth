@@ -5,7 +5,7 @@ from pydantic import UUID4
 from organization_auth.adapters.repositories.teams import TeamsAbstractRepository
 from organization_auth.domain.users import User
 from organization_auth.service_layer.exceptions import (
-    RoleDoesNotExistException, TeamDoesNotExistException, UserAlreadyExistsException, UserDoesNotExistException
+    TeamDoesNotExistException, UserAlreadyExistsException, UserDoesNotExistException
 )
 
 

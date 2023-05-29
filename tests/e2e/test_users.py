@@ -6,7 +6,7 @@ from organization_auth.adapters.repositories.teams import TeamsDynamoDBRepositor
 from organization_auth.domain.teams import Team
 from organization_auth.domain.users import User
 from organization_auth.service_layer.exceptions import (
-    RoleDoesNotExistException, TeamDoesNotExistException, UserAlreadyExistsException, UserDoesNotExistException
+    TeamDoesNotExistException, UserAlreadyExistsException, UserDoesNotExistException
 )
 from organization_auth.service_layer.users import (
     change_user_name, change_user_role, create_user, delete_user, disable_user, enable_user, list_users

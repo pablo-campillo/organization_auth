@@ -1,5 +1,5 @@
 from typing import List
-from pydantic import Field, UUID4
+from pydantic import Field
 
 from organization_auth.domain.base import DCEBaseModel
 from organization_auth.domain.users import User

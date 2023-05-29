@@ -28,3 +28,8 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 oa = "organization_auth.cli.main:app"
+
+
+[tool.ruff]
+# Same as Black.
+line-length = 120

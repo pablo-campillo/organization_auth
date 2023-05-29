@@ -3,7 +3,6 @@ from typing import List, Optional
 from pydantic import UUID4
 from organization_auth.adapters.repositories.teams import TeamsAbstractRepository
 from organization_auth.domain.groups import Group
-from organization_auth.domain.roles import DCERoleEnum
 
 from organization_auth.service_layer.exceptions import (
     GroupAlreadyExistsException, GroupDoesNotExistException, RoleDoesNotExistException
