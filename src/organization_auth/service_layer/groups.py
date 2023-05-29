@@ -54,9 +54,9 @@ def change_group_name(repo: TeamsAbstractRepository, group_id: UUID4, new_name: 
 
 
 def change_group_role(repo: TeamsAbstractRepository, group_id: UUID4, new_role: str) -> Group:
-    if not DCERoleEnum.is_valid(new_role):
-        raise RoleDoesNotExistException()
     if (group := repo.get_group(group_id=group_id)) is not None:
+        if not group.is_valid_role(new_role):
+            raise RoleDoesNotExistException()
         group.role = new_role
         return repo.save_group(group)
     else:

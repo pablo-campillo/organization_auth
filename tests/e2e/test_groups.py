@@ -123,7 +123,7 @@ def test_add_role(repo, empty_group):
 
     group = add_role(repo, empty_group.id, new_role_name)
 
-    assert len(group.roles) == 2
+    assert len(group.roles) == 3
     assert new_role_name in group.roles
 
 

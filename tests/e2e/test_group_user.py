@@ -1,6 +1,6 @@
 import pytest
 from organization_auth.service_layer.exceptions import (
-    GroupDoesNotExistException, GroupUserDoesNotExistException, RoleDoesNotExistException, 
+    GroupDoesNotExistException, GroupUserDoesNotExistException, RoleDoesNotExistException,
     UserAlreadyInGroupException, UserDoesNotExistException
 )
 from organization_auth.service_layer.group_user import (

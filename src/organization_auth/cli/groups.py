@@ -2,10 +2,11 @@ from typing import Optional, List
 from uuid import UUID, uuid4
 import typer
 
+from organization_auth.cli.console import error_console
 from organization_auth.adapters.repositories.teams import TeamsDynamoDBRepository
 from organization_auth.cli.view import show_group, show_groups
 from organization_auth.service_layer import groups as service
-from organization_auth.service_layer.exceptions import GroupDoesNotExistException, RoleDoesNotExistException
+from organization_auth.service_layer.exceptions import GroupAlreadyExistsException, GroupDoesNotExistException, RoleDoesNotExistException
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -18,8 +19,12 @@ def new(team_id: UUID, name: str, role: str, group_id: Optional[UUID] = None,
     """Creates a new group in a team"""
     if group_id is None:
         group_id = uuid4()
-    group = service.create_group(repo, team_id=team_id, group_id=group_id, name=name, role=role, roles=roles)
-    show_group(group)
+    try:
+        group = service.create_group(repo, team_id=team_id, group_id=group_id, name=name, role=role, roles=roles)
+        show_group(group)
+    except GroupAlreadyExistsException:
+        error_console.print(f"Group {team_id} already exists!")
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -37,7 +42,8 @@ def rm(group_id: UUID):
             group = service.delete_group(repo, group_id=group_id)
             show_group(group)
         except GroupDoesNotExistException:
-            pass
+            error_console.print(f"Group {group_id} does not exist!")
+            raise typer.Exit(code=1)
 
 
 @app.command()
@@ -47,7 +53,8 @@ def disable(group_id: UUID):
         group = service.disable_group(repo, group_id=group_id)
         show_group(group)
     except GroupDoesNotExistException:
-        pass
+        error_console.print(f"Group {group_id} does not exist!")
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -57,7 +64,8 @@ def enable(group_id: UUID):
         group = service.enable_group(repo, group_id=group_id)
         show_group(group)
     except GroupDoesNotExistException:
-        pass
+        error_console.print(f"Group {group_id} does not exist!")
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -67,7 +75,8 @@ def rename(group_id: UUID, new_name: str):
         group = service.change_group_name(repo, group_id=group_id, new_name=new_name)
         show_group(group)
     except GroupDoesNotExistException:
-        pass
+        error_console.print(f"Group {group_id} does not exist!")
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -77,9 +86,11 @@ def rerole(group_id: UUID, new_role: str):
         group = service.change_group_role(repo, group_id=group_id, new_role=new_role)
         show_group(group)
     except GroupDoesNotExistException:
-        pass
+        error_console.print(f"Group {group_id} does not exist!")
+        raise typer.Exit(code=1)
     except RoleDoesNotExistException:
-        pass
+        error_console.print(f"Role {new_role} not allowed for group {group_id}!")
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -89,7 +100,8 @@ def get(group_id: UUID):
         group = service.get_group(repo, group_id=group_id)
         show_group(group)
     except GroupDoesNotExistException:
-        pass
+        error_console.print(f"Group {group_id} does not exist!")
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -99,4 +111,5 @@ def add_role(group_id: UUID, new_role: str):
         group = service.add_role(repo, group_id=group_id, new_role_name=new_role)
         show_group(group)
     except GroupDoesNotExistException:
-        pass
+        error_console.print(f"Group {group_id} does not exist!")
+        raise typer.Exit(code=1)

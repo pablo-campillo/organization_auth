@@ -2,7 +2,7 @@ from typing import List
 from pydantic import UUID4
 
 from organization_auth.adapters.repositories.teams import TeamsAbstractRepository
-from organization_auth.domain.groups import Group, GroupUser
+from organization_auth.domain.groups import GroupUser
 from organization_auth.service_layer.exceptions import (
     GroupUserDoesNotExistException, RoleDoesNotExistException, UserAlreadyInGroupException
 )

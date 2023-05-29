@@ -48,7 +48,7 @@ def empty_group(repo, empty_team):
     group_id = uuid4()
     name = "MyGroup"
     role = "User"
-    return create_group(repo, team_id=empty_team.id, group_id=group_id, name=name, role=role)
+    return create_group(repo, team_id=empty_team.id, group_id=group_id, name=name, role=role, roles=["Team_Owner"])
 
 
 @pytest.fixture()
