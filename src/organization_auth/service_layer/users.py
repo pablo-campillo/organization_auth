@@ -3,10 +3,9 @@ from typing import List, Optional
 from pydantic import UUID4
 
 from organization_auth.adapters.repositories.teams import TeamsAbstractRepository
-from organization_auth.domain.roles import DCERoleEnum
 from organization_auth.domain.users import User
 from organization_auth.service_layer.exceptions import (
-    RoleDoesNotExistException, UserAlreadyExistsException, UserDoesNotExistException
+    RoleDoesNotExistException, TeamDoesNotExistException, UserAlreadyExistsException, UserDoesNotExistException
 )
 
 
@@ -17,6 +16,9 @@ def create_user(repo: TeamsAbstractRepository, team_id: UUID4, name: str, role: 
     else:
         # TODO Check if the user is already created in other Team
         pass
+
+    if repo.get_team(team_id) is None:
+        raise TeamDoesNotExistException()
 
     if (user := repo.get_user(user_id)) is not None:
         raise UserAlreadyExistsException()
@@ -64,8 +66,6 @@ def change_user_name(repo: TeamsAbstractRepository, user_id: UUID4, new_name: st
 
 
 def change_user_role(repo: TeamsAbstractRepository, user_id: UUID4, new_role: str) -> User:
-    if not DCERoleEnum.is_valid(new_role):
-        raise RoleDoesNotExistException()
     if (user := repo.get_user(user_id=user_id)) is not None:
         user.role = new_role
         return repo.save_user(user)

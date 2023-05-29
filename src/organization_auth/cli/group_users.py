@@ -1,8 +1,9 @@
 from uuid import UUID
 import typer
 
+from organization_auth.cli.console import error_console
 from organization_auth.adapters.repositories.teams import TeamsDynamoDBRepository
-from organization_auth.cli.view import show_group, show_group_user, show_group_users, show_groups
+from organization_auth.cli.view import show_group, show_group_user, show_group_users
 from organization_auth.service_layer import group_user as service
 from organization_auth.service_layer.exceptions import (
     GroupDoesNotExistException, GroupUserDoesNotExistException, RoleDoesNotExistException,
@@ -17,8 +18,12 @@ repo = TeamsDynamoDBRepository()
 @app.command()
 def get(team_id: UUID, group_id: UUID, user_id: UUID):
     """Gets a User in a Group of a Team"""
-    group_user = service.get_user_in_group(team_id, group_id, user_id)
-    show_group(group_user)
+    try:
+        group_user = service.get_user_in_group(team_id, group_id, user_id)
+        show_group(group_user)
+    except UserDoesNotExistException:
+        error_console.print(f"User {user_id} does not exist!")
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -28,11 +33,14 @@ def add(group_id: UUID, user_id: UUID, role: str):
         group_user = service.add_user_to_group(repo, group_id=group_id, user_id=user_id, role=role)
         show_group_user(group_user)
     except UserDoesNotExistException:
-        pass
+        error_console.print(f"User {user_id} does not exist!")
+        raise typer.Exit(code=1)
     except GroupDoesNotExistException:
-        pass
+        error_console.print(f"Group {group_id} does not exist!")
+        raise typer.Exit(code=1)
     except UserAlreadyInGroupException:
-        pass
+        error_console.print(f"User {user_id} is already in Group {group_id}!")
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -46,9 +54,11 @@ def rerole(team_id: UUID, group_id: UUID, user_id: UUID, new_role: str):
                                                     new_role=new_role)
         show_group_user(group_user)
     except GroupUserDoesNotExistException:
-        pass
+        error_console.print(f"Group {group_id} does not exist!")
+        raise typer.Exit(code=1)
     except RoleDoesNotExistException:
-        pass
+        error_console.print(f"Role {new_role} not in Group {group_id}!")
+        raise typer.Exit(code=1)
 
 
 @app.command()

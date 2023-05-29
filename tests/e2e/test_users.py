@@ -3,11 +3,10 @@ from uuid import uuid4, UUID
 import pytest
 from organization_auth.adapters.repositories.teams import TeamsDynamoDBRepository
 
-from organization_auth.domain.roles import DCERoleEnum
 from organization_auth.domain.teams import Team
 from organization_auth.domain.users import User
 from organization_auth.service_layer.exceptions import (
-    RoleDoesNotExistException, UserAlreadyExistsException, UserDoesNotExistException
+    RoleDoesNotExistException, TeamDoesNotExistException, UserAlreadyExistsException, UserDoesNotExistException
 )
 from organization_auth.service_layer.users import (
     change_user_name, change_user_role, create_user, delete_user, disable_user, enable_user, list_users
@@ -17,7 +16,7 @@ from organization_auth.service_layer.users import (
 def test_create_user(repo: TeamsDynamoDBRepository, empty_team: Team):
     user_id = uuid4()
     name = "MyUser"
-    role = DCERoleEnum.User.name
+    role = "User"
     user = create_user(repo, team_id=empty_team.id, user_id=user_id, name=name, role=role)
 
     assert user.id == user_id
@@ -27,9 +26,18 @@ def test_create_user(repo: TeamsDynamoDBRepository, empty_team: Team):
     assert not user.deleted
 
 
+def test_create_user_team_does_not_exist(repo: TeamsDynamoDBRepository, empty_user: User):
+    role = "User"
+    name = "MyUser"
+    team_id = "Fake"
+
+    with pytest.raises(TeamDoesNotExistException):
+        create_user(repo, team_id=team_id, name=name, role=role)
+
+
 def test_create_user_with_auto_id(repo: TeamsDynamoDBRepository, empty_team: Team):
     name = "MyUser"
-    role = DCERoleEnum.User.name
+    role = "User"
     user = create_user(repo, team_id=empty_team.id, name=name, role=role)
 
     assert isinstance(user.id, UUID)
@@ -40,9 +48,8 @@ def test_create_user_with_auto_id(repo: TeamsDynamoDBRepository, empty_team: Tea
 
 
 def test_create_user_already_exists(repo: TeamsDynamoDBRepository, empty_user: User):
-    role = DCERoleEnum.User.name
+    role = "User"
     name = "MyUser"
-    role = DCERoleEnum.User.name
 
     with pytest.raises(UserAlreadyExistsException):
         create_user(repo, team_id=empty_user.team_id, user_id=empty_user.id, name=name, role=role)
@@ -109,12 +116,6 @@ def test_change_user_role_does_not_exists(repo: TeamsDynamoDBRepository):
     new_role = 'Team_Owner'
     with pytest.raises(UserDoesNotExistException):
         change_user_role(repo, user_id="Fake", new_role=new_role)
-
-
-def test_change_user_role_bad_role_name(repo: TeamsDynamoDBRepository, empty_user: User):
-    new_role = 'Fake'
-    with pytest.raises(RoleDoesNotExistException):
-        change_user_role(repo, user_id=empty_user.id, new_role=new_role)
 
 
 def test_list_users(repo: TeamsDynamoDBRepository, team_with_5_users):
