@@ -6,7 +6,7 @@ import typer
 
 from organization_auth.cli.console import error_console
 from organization_auth.adapters.repositories.teams import TeamsDynamoDBRepository
-from organization_auth.cli.view import show_access_token, show_group, show_groups
+from organization_auth.cli.view import show_access_token, show_user, show_users
 from organization_auth.service_layer import users as service
 from organization_auth.service_layer import tokens as token_service
 from organization_auth.service_layer.exceptions import (
@@ -24,7 +24,7 @@ def new(team_id: UUID, user_id: UUID, name: str, role: str):
     """Creates a new User in a Team"""
     try:
         user = service.create_user(repo, team_id=team_id, user_id=user_id, name=name, role=role)
-        show_group(user)
+        show_user(user, title="New User Created")
     except TeamDoesNotExistException:
         error_console.print(f"Team {team_id} does not exist!")
         raise typer.Exit(code=1)
@@ -38,7 +38,7 @@ def get(user_id: UUID):
     """Gets a User"""
     try:
         user = service.get_user(repo, user_id=user_id)
-        show_group(user)
+        show_user(user, title="User Info")
     except UserDoesNotExistException:
         error_console.print(f"User {user_id} does not exists!")
         raise typer.Exit(code=1)
@@ -50,7 +50,7 @@ def rm(user_id: UUID):
     if typer.confirm("You can undo this action. Are you sure you want to delete it?"):
         try:
             user = service.delete_user(repo, user_id=user_id)
-            show_group(user)
+            show_user(user, title="User Deleted")
         except UserDoesNotExistException:
             error_console.print(f"User {user_id} does not exists!")
             raise typer.Exit(code=1)
@@ -61,7 +61,7 @@ def disable(user_id: UUID):
     """Disables a User"""
     try:
         user = service.disable_user(repo, user_id=user_id)
-        show_group(user)
+        show_user(user, title="User Disabled")
     except UserDoesNotExistException:
         error_console.print(f"User {user_id} does not exists!")
         raise typer.Exit(code=1)
@@ -72,7 +72,7 @@ def enable(user_id: UUID):
     """Enables a User"""
     try:
         user = service.enable_user(repo, user_id=user_id)
-        show_group(user)
+        show_user(user, title="User Enabled")
     except UserDoesNotExistException:
         error_console.print(f"User {user_id} does not exists!")
         raise typer.Exit(code=1)
@@ -83,7 +83,7 @@ def rename(user_id: UUID, new_name: str):
     """Renames a User"""
     try:
         user = service.change_user_name(repo, user_id=user_id, new_name=new_name)
-        show_group(user)
+        show_user(user, title="User Renamed")
     except UserDoesNotExistException:
         error_console.print(f"User {user_id} does not exists!")
         raise typer.Exit(code=1)
@@ -94,7 +94,7 @@ def rerole(user_id: UUID, new_role: str):
     """Changes role name of a User"""
     try:
         user = service.change_user_role(repo, user_id=user_id, new_name=new_role)
-        show_group(user)
+        show_user(user, title="User with new Role")
     except UserDoesNotExistException:
         error_console.print(f"User {user_id} does not exists!")
         raise typer.Exit(code=1)
@@ -103,8 +103,8 @@ def rerole(user_id: UUID, new_role: str):
 @app.command()
 def ls(team_id: UUID):
     """Lists all Users in a Team"""
-    users = service.list_users(team_id)
-    show_groups(users)
+    users = service.list_users(repo, team_id)
+    show_users(users, title=f"List of users of Team: {str(team_id)}")
 
 
 @app.command()
