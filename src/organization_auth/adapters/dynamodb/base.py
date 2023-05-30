@@ -1,4 +1,5 @@
 import os
+from organization_auth.domain.base import DCEBaseModel
 
 from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, DiscriminatorAttribute, UTCDateTimeAttribute
@@ -46,3 +47,10 @@ class DDBOrganizationModel(Model):
     cls = DiscriminatorAttribute()
 
     classes_index = ClassesIndex()
+
+    def to_domain(self):
+        return DCEBaseModel(
+            id=self.pk_id,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+        )

@@ -1,4 +1,9 @@
+from pathlib import Path
+from organization_auth.service_layer.maintenance import make_backup, restore_backup
 import typer
+
+from organization_auth.cli.console import error_console
+from organization_auth.adapters.file_back import FileRepository
 from organization_auth.adapters.dynamodb.base import DDBOrganizationModel
 from organization_auth.cli import teams
 from organization_auth.cli import groups
@@ -8,6 +13,8 @@ from organization_auth.adapters.repositories.teams import TeamsDynamoDBRepositor
 
 app = typer.Typer(no_args_is_help=True)
 repo = TeamsDynamoDBRepository()
+file_repo = FileRepository()
+
 
 app.add_typer(teams.app, name="teams", help="Manages teams")
 app.add_typer(groups.app, name="groups", help="Manages groups in teams")
@@ -20,6 +27,19 @@ def callback():
     """
     CLI app for managing organization entities (Teams, Groups and Users).
     """
+
+
+@app.command()
+def back(file: str):
+    make_backup(repo, file_repo, Path(file))
+
+
+@app.command()
+def restore(file: str):
+    try:
+        restore_backup(repo, file_repo, Path(file))
+    except FileExistsError:
+        error_console.print(f"File {file} not found!")
 
 
 @app.command()

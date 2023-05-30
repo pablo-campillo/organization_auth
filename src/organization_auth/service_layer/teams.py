@@ -57,3 +57,7 @@ def get_team(repo: TeamsAbstractRepository, team_id: UUID4) -> Team:
 
 def list_teams(repo: TeamsAbstractRepository) -> List[Team]:
     return repo.list_teams()
+
+
+def list_all(repo: TeamsAbstractRepository) -> List[Team]:
+    return repo.list_all()

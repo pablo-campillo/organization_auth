@@ -1,5 +1,7 @@
 import abc
 from typing import List
+from organization_auth.adapters.dynamodb.base import DDBOrganizationModel
+from organization_auth.domain.base import DCEBaseModel
 
 from pydantic import UUID4
 from organization_auth.adapters.dynamodb.groups import GROUP_CLASS, DDBGroup, DDBGroupUser
@@ -66,7 +68,10 @@ class TeamsAbstractRepository(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def list_groups_of_user(self, team_id: UUID4, user_id: UUID4) -> List[Group]: # pragma: no cover
+    def list_groups_of_user(self, team_id: UUID4, user_id: UUID4) -> List[Group]:  # pragma: no cover
+        pass
+
+    def list_all(self) -> List[DCEBaseModel]:  # pragma: no cover
         pass
 
 
@@ -155,3 +160,24 @@ class TeamsDynamoDBRepository(TeamsAbstractRepository):
                                                 (DDBGroupUser.sk_id.contains(f"#{user_id}"))
                                                 )
         ]
+
+    def list_all(self) -> List[DCEBaseModel]:
+        return [
+            ddb_item.to_domain()
+            for ddb_item in DDBOrganizationModel.scan()
+        ]
+
+    def save_all(self, items: List[DCEBaseModel]) -> List[DCEBaseModel]:
+
+        with DDBOrganizationModel.batch_write() as batch:
+            for item in items:
+                if isinstance(item, Team):
+                    batch.save(DDBTeam.from_domain(item))
+                elif isinstance(item, Group):
+                    batch.save(DDBGroup.from_domain(item))
+                if isinstance(item, User):
+                    batch.save(DDBUser.from_domain(item))
+                if isinstance(item, GroupUser):
+                    batch.save(DDBGroupUser.from_domain(item))
+
+        return items
