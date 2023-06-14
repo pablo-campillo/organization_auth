@@ -1,5 +1,7 @@
 import abc
 from typing import List
+from organization_auth.adapters.dynamodb.base import DDBOrganizationModel
+from organization_auth.domain.base import DCEBaseModel
 
 from pydantic import UUID4
 from organization_auth.adapters.dynamodb.groups import GROUP_CLASS, DDBGroup, DDBGroupUser
@@ -14,59 +16,62 @@ from organization_auth.domain.users import User
 class TeamsAbstractRepository(abc.ABC):
 
     @abc.abstractmethod
-    def save_team(self, team: Team) -> Team: # pragma: no cover
+    def save_team(self, team: Team) -> Team:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def get_team(self, id: UUID4) -> Team: # pragma: no cover
+    def get_team(self, id: UUID4) -> Team:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def list_teams(self) -> List[Team]: # pragma: no cover
+    def list_teams(self) -> List[Team]:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def save_group(self, group: Group) -> Group: # pragma: no cover
+    def save_group(self, group: Group) -> Group:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def get_group(self, group_id: UUID4): # pragma: no cover
+    def get_group(self, group_id: UUID4) -> Group:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def list_groups(self, team_id: UUID4): # pragma: no cover
+    def list_groups(self, team_id: UUID4) -> List[Group]:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def save_user(self, user: User) -> User: # pragma: no cover
+    def save_user(self, user: User) -> User:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def get_user(self, user_id: UUID4): # pragma: no cover
+    def get_user(self, user_id: UUID4):  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def list_users(self, team_id: UUID4): # pragma: no cover
+    def list_users(self, team_id: UUID4):  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def is_user_in_group(self, team_id: UUID4, group_id: UUID4, user_id: UUID4) -> bool: # pragma: no cover
+    def is_user_in_group(self, team_id: UUID4, group_id: UUID4, user_id: UUID4) -> bool:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def get_user_in_group(self, team_id: UUID4, group_id: UUID4, user_id: UUID4) -> GroupUser: # pragma: no cover
+    def get_user_in_group(self, team_id: UUID4, group_id: UUID4, user_id: UUID4) -> GroupUser:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def save_group_user(self, group_user: GroupUser) -> bool: # pragma: no cover
+    def save_group_user(self, group_user: GroupUser) -> GroupUser:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def list_group_users(self, team_id: UUID4, group_id: UUID4) -> List[GroupUser]: # pragma: no cover
+    def list_group_users(self, team_id: UUID4, group_id: UUID4) -> List[GroupUser]:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def list_groups_of_user(self, team_id: UUID4, user_id: UUID4) -> List[Group]: # pragma: no cover
+    def list_groups_of_user(self, team_id: UUID4, user_id: UUID4) -> List[Group]:  # pragma: no cover
+        pass
+
+    def list_all(self) -> List[DCEBaseModel]:  # pragma: no cover
         pass
 
 
@@ -135,12 +140,12 @@ class TeamsDynamoDBRepository(TeamsAbstractRepository):
         except DDBGroupUser.DoesNotExist:
             pass
 
-    def save_group_user(self, group_user: GroupUser) -> bool:
+    def save_group_user(self, group_user: GroupUser) -> GroupUser:
         ddb_group_user = DDBGroupUser.from_domain(group_user)
         ddb_group_user.save()
         return ddb_group_user.to_domain()
 
-    def list_group_users(self, team_id: UUID4, group_id: UUID4) -> List[GroupUser]: # pragma: no cover
+    def list_group_users(self, team_id: UUID4, group_id: UUID4) -> List[GroupUser]:  # pragma: no cover
         return [
             ddb_group_user.to_domain()
             for ddb_group_user in DDBGroupUser.query(str(team_id),
@@ -155,3 +160,24 @@ class TeamsDynamoDBRepository(TeamsAbstractRepository):
                                                 (DDBGroupUser.sk_id.contains(f"#{user_id}"))
                                                 )
         ]
+
+    def list_all(self) -> List[DCEBaseModel]:
+        return [
+            ddb_item.to_domain()
+            for ddb_item in DDBOrganizationModel.scan()
+        ]
+
+    def save_all(self, items: List[DCEBaseModel]) -> List[DCEBaseModel]:
+
+        with DDBOrganizationModel.batch_write() as batch:
+            for item in items:
+                if isinstance(item, Team):
+                    batch.save(DDBTeam.from_domain(item))
+                elif isinstance(item, Group):
+                    batch.save(DDBGroup.from_domain(item))
+                if isinstance(item, User):
+                    batch.save(DDBUser.from_domain(item))
+                if isinstance(item, GroupUser):
+                    batch.save(DDBGroupUser.from_domain(item))
+
+        return items

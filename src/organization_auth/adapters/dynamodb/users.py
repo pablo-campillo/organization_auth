@@ -2,7 +2,6 @@ import uuid
 from pynamodb.attributes import UnicodeAttribute, BooleanAttribute
 
 from organization_auth.adapters.dynamodb.base import DDBOrganizationModel
-from organization_auth.domain.roles import DCERoleEnum
 from organization_auth.domain.users import User
 
 
@@ -32,7 +31,7 @@ class DDBUser(DDBOrganizationModel, discriminator=USER_CLASS):
             id=uuid.UUID(str(self.sk_id)[len(USER_CLASS):]),
             team_id=uuid.UUID(self.pk_id),
             name=self.name,
-            role=DCERoleEnum[self.role],
+            role=self.role,
             deleted=self.deleted,
             enabled=self.enabled,
             created_at=self.created_at,

@@ -1,3 +1,6 @@
+import os
+from organization_auth.domain.base import DCEBaseModel
+
 from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, DiscriminatorAttribute, UTCDateTimeAttribute
 from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
@@ -32,8 +35,8 @@ class DDBOrganizationModel(Model):
     """
     class Meta:
         table_name = "DDBOrganizationModel"
-        host = "http://localhost:4566"
-        region = "us-east-1"
+        host = os.environ.get("AWS_URL", "http://localhost:4566")
+        region = os.environ.get("AWS_REGION", "eu-west-1")
 
     pk_id = UnicodeAttribute(hash_key=True)
     sk_id = UnicodeAttribute(range_key=True)
@@ -44,3 +47,10 @@ class DDBOrganizationModel(Model):
     cls = DiscriminatorAttribute()
 
     classes_index = ClassesIndex()
+
+    def to_domain(self):
+        return DCEBaseModel(
+            id=self.pk_id,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+        )
