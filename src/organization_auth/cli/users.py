@@ -1,6 +1,7 @@
 from datetime import timedelta
 from typing import Optional
 from uuid import UUID
+import uuid
 from organization_auth.adapters.tokens import JoseJWTTokenProcessor
 import typer
 
@@ -20,8 +21,10 @@ token_processor = JoseJWTTokenProcessor()
 
 
 @app.command()
-def new(team_id: UUID, user_id: UUID, name: str, role: str):
+def new(team_id: UUID, name: str, role: str, user_id: Optional[UUID] = None):
     """Creates a new User in a Team"""
+    if not user_id:
+        user_id = uuid.uuid4()
     try:
         user = service.create_user(repo, team_id=team_id, user_id=user_id, name=name, role=role)
         show_user(user, title="New User Created")

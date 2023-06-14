@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import List
+from organization_auth.domain.base import DCEBaseModel
 from organization_auth.domain.tokens import UserToken
 from rich.table import Table
 from rich.tree import Tree
@@ -214,3 +215,7 @@ def _bool_value_icon(value: bool) -> str:
 
 def _format_datetime(dt: datetime) -> str:
     return f"{dt.strftime('%Y-%m-%d')} [gray50]{dt.strftime('%H:%M:%S')} UTC"
+
+
+def show_all(items: List[DCEBaseModel]):
+    console.print(items)

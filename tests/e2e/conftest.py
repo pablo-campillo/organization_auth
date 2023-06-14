@@ -1,4 +1,5 @@
 from uuid import uuid4
+from organization_auth.adapters.file_back import FileRepository
 from organization_auth.adapters.tokens import JoseJWTTokenProcessor
 import pytest
 
@@ -21,6 +22,16 @@ def reset_dynamodb_table():
 @pytest.fixture()
 def repo():
     return TeamsDynamoDBRepository()
+
+
+@pytest.fixture()
+def file_repo():
+    return FileRepository()
+
+
+@pytest.fixture()
+def backup_file(tmp_path):
+    return tmp_path / "back.json"
 
 
 @pytest.fixture()
